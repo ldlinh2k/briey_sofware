@@ -5,11 +5,11 @@ ifeq ($(SIFIVE_GCC_PACK),yes)
 	RISCV_NAME ?= riscv64-unknown-elf
 	RISCV_PATH ?= /opt/riscv/
 else
-	RISCV_NAME ?= riscv32-unknown-elf
+	RISCV_NAME ?= riscv64-unknown-elf
 	ifeq ($(MULDIV),yes)
-		RISCV_PATH ?= /opt/gcc9/riscv32im/
+		RISCV_PATH ?= /opt/riscv/
 	else
-		RISCV_PATH ?= /opt/gcc9/riscv32i/
+		RISCV_PATH ?= /opt/riscv/
 	endif
 endif
 

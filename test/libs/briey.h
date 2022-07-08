@@ -19,6 +19,13 @@
 
 #define GPIO_A_BASE    ((Gpio_Reg*)(0xF0000000))
 #define GPIO_B_BASE    ((Gpio_Reg*)(0xF0001000))
+#define GPIO_CHIPSELECT_N_BASE    ((Gpio_Reg*)(0xF0002000))
+#define GPIO_WRITE_N_BASE    ((Gpio_Reg*)(0xF0003000))
+#define GPIO_READ_N_BASE    ((Gpio_Reg*)(0xF0004000))
+#define GPIO_ADDRESS_BASE    ((Gpio_Reg*)(0xF0005000))
+#define GPIO_DATA_BASE    ((Gpio_Reg*)(0xF0006000))
+#define GPIO_OUTPUT_DATA_BASE    ((Gpio_Reg*)(0xF0007000))
+
 #define UART      ((Uart_Reg*)(0xF0010000))
 #define VGA_BASE       ((Vga_Reg*)(0xF0030000))
 
