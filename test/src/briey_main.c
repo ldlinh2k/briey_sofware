@@ -14,26 +14,28 @@
 #define DATA_READY_ADDRESS 0x14
 #define RESET_EXTERNAL_ADDRESS 0x18
 
-void aes_gpio_write(int iData, int iAddress)
+void gpio_write(int iData, int iAddress)
 {
-	GPIO_CHIPSELECT_N_BASE->OUTPUT=0;
-	GPIO_WRITE_N_BASE->OUTPUT=0;
-	GPIO_READ_N_BASE->OUTPUT=1;
-	GPIO_ADDRESS_BASE->OUTPUT=iAddress;
-	GPIO_DATA_BASE->OUTPUT =iData;
+	GPIO_ADDRESS_BASE ->OUTPUT=iAddress;
+	GPIO_DATA_BASE ->OUTPUT=iData;
+	GPIO_READ_N_BASE ->OUTPUT=1;
+	GPIO_WRITE_N_BASE ->OUTPUT=0;
+	GPIO_CHIPSELECT_BASE ->OUTPUT=1;
+	GPIO_CHIPSELECT_BASE ->OUTPUT=0;
 }
-int aes_gpio_read(int iAddress)
+int gpio_read(int iAddress)
 {
-	GPIO_CHIPSELECT_N_BASE->OUTPUT=0;
-	GPIO_WRITE_N_BASE->OUTPUT=1;
-	GPIO_READ_N_BASE->OUTPUT=0;
-	GPIO_ADDRESS_BASE->OUTPUT=iAddress;
-	int res = GPIO_OUTPUT_DATA_BASE->INPUT;
-	return GPIO_OUTPUT_DATA_BASE->INPUT;
+	GPIO_ADDRESS_BASE ->OUTPUT=iAddress;
+	GPIO_WRITE_N_BASE ->OUTPUT=1;
+	GPIO_READ_N_BASE ->OUTPUT=0;
+	GPIO_CHIPSELECT_BASE ->OUTPUT=1;
+	int res = GPIO_A_BASE->INPUT;
+	GPIO_CHIPSELECT_BASE ->OUTPUT=0;
+	return res;
 }
 void freeTime()
 {
-	GPIO_CHIPSELECT_N_BASE->OUTPUT=1;
+	GPIO_CHIPSELECT_BASE->OUTPUT=1;
 	GPIO_WRITE_N_BASE->OUTPUT=1;
 	GPIO_READ_N_BASE->OUTPUT=1;
 }
@@ -58,125 +60,56 @@ int main() {
 	print("AES Accelerator - Duy Linh Le K18\r\n");
 	print("Briey SoC on FPGA\r\n");
 	
+	int res;
+	gpio_write(0x15,0);
+	gpio_write(0x17,1);
+	gpio_write(0x35,2);
+	gpio_write(0x75,3);
+
+	res= gpio_read(0);
+	res =gpio_read(1);
+	res =gpio_read(3);
+	res =gpio_read(2);
 
 
-	//Test new instruction simple sub
-	int a=0x39;
-	int b=0x12;
-	int result_con_cate=con_cate_bits_func(a,b);
-	int ALU_add1 = ALU_add(a,b);
-	int ALU_sub1= ALU_sub(a,b);
-	//int result_con_cate1=con_cate_bits_func(b,a);
 
 
-	GPIO_A_BASE->OUTPUT=result_con_cate;
-	int sw = GPIO_A_BASE ->INPUT;
-
-	GPIO_CHIPSELECT_N_BASE->OUTPUT=1;
-	GPIO_WRITE_N_BASE->OUTPUT=1;
-
-	GPIO_ADDRESS_BASE->OUTPUT=0;
-	GPIO_DATA_BASE->OUTPUT=35;
-
-	GPIO_ADDRESS_BASE->OUTPUT=1;
-	GPIO_DATA_BASE->OUTPUT=25;
-
-	GPIO_CHIPSELECT_N_BASE->OUTPUT=0;
-
-	for(int i=0;i<10;i++)
-	{
-		for(int j=0;j<32768;j++);
-	}
-	GPIO_CHIPSELECT_N_BASE->OUTPUT=1;
-	GPIO_WRITE_N_BASE->OUTPUT=0;
-	for(int i=0;i<10;i++)
-	{
-		for(int j=0;j<32768;j++);
-	}
-	GPIO_ADDRESS_BASE->OUTPUT=1;
-	int result1 = GPIO_OUTPUT_DATA_BASE->INPUT;
-
-	GPIO_ADDRESS_BASE->OUTPUT=1;
-	result1 = GPIO_OUTPUT_DATA_BASE->INPUT;
-
-
-	GPIO_DATA_BASE->OUTPUT=12;
-	GPIO_WRITE_N_BASE->OUTPUT=0;
-
-	GPIO_WRITE_N_BASE->OUTPUT=1;
-	GPIO_READ_N_BASE->OUTPUT=0;
-
-	int res=GPIO_OUTPUT_DATA_BASE->INPUT;
-
-	GPIO_READ_N_BASE->OUTPUT=0;
-	res=GPIO_OUTPUT_DATA_BASE->INPUT;
-	GPIO_DATA_BASE->OUTPUT=34;
-	res=GPIO_OUTPUT_DATA_BASE->INPUT;
-	aes_gpio_write(0x123,0);
-	aes_gpio_write(0x456,1);
-	aes_gpio_write(0x789,2);
-	aes_gpio_write(0x10,3);
-
-	int res1=aes_gpio_read(0);
-	int res2=aes_gpio_read(1);
-	int res3=aes_gpio_read(2);
-	int res4=aes_gpio_read(3);
-for(int i=0;i<100;i++)
-{
-	GPIO_A_BASE->OUTPUT=i;
-}
-while(1)
-{
-	GPIO_A_BASE->OUTPUT=GPIO_A_BASE->OUTPUT_ENABLE;
-	GPIO_B_BASE->OUTPUT=GPIO_B_BASE->OUTPUT_ENABLE;
-}
-while(1)
-{
-
-
-	 res1=aes_gpio_read(0);
-		 res2=aes_gpio_read(1);
-		 res3=aes_gpio_read(2);
-		 res4=aes_gpio_read(3);
-
-}
-
-	//2. write LeDuyLinh DESLAB to plainText
-		aes_gpio_write(0x4C654475,PLAIN_TEXT_BASE_ADDRESS + 0);
-		freeTime();
-		aes_gpio_write(0x794C696E,PLAIN_TEXT_BASE_ADDRESS + 1);
-		freeTime();
-		aes_gpio_write(0x68204445,PLAIN_TEXT_BASE_ADDRESS + 2);
-		freeTime();
-		aes_gpio_write(0x534C4142,PLAIN_TEXT_BASE_ADDRESS + 3);
-		freeTime();
-		//3.write aesEncyptionKey to iKey
-		aes_gpio_write(0x61657345,IKEY_BASE_ADDRESS + 0);
-		freeTime();
-		aes_gpio_write(0x6E637279,IKEY_BASE_ADDRESS + 1);
-		freeTime();
-		aes_gpio_write(0x7074696F,IKEY_BASE_ADDRESS + 2);
-		freeTime();
-		aes_gpio_write(0x6E4B6579,IKEY_BASE_ADDRESS + 3);
-		freeTime();
-
-		//4.write 1 to iStart
-		aes_gpio_write(1,START_BASE_ADDRESS);
-		freeTime();
-
-		//wait
-		while(aes_gpio_read(DATA_BASE_ADDRESS)==0);
-		freeTime();
-
-		int result[4];
-		result[0]= aes_gpio_read(DATA_BASE_ADDRESS + 0);
-		freeTime();
-		result[1]= aes_gpio_read(DATA_BASE_ADDRESS + 1);
-		freeTime();
-		result[2]= aes_gpio_read(DATA_BASE_ADDRESS + 2);
-		freeTime();
-		result[3]= aes_gpio_read(DATA_BASE_ADDRESS + 3);
-		freeTime();
+//	//2. write LeDuyLinh DESLAB to plainText
+//		aes_gpio_write(0x4C654475,PLAIN_TEXT_BASE_ADDRESS + 0);
+//		freeTime();
+//		aes_gpio_write(0x794C696E,PLAIN_TEXT_BASE_ADDRESS + 1);
+//		freeTime();
+//		aes_gpio_write(0x68204445,PLAIN_TEXT_BASE_ADDRESS + 2);
+//		freeTime();
+//		aes_gpio_write(0x534C4142,PLAIN_TEXT_BASE_ADDRESS + 3);
+//		freeTime();
+//		//3.write aesEncyptionKey to iKey
+//		aes_gpio_write(0x61657345,IKEY_BASE_ADDRESS + 0);
+//		freeTime();
+//		aes_gpio_write(0x6E637279,IKEY_BASE_ADDRESS + 1);
+//		freeTime();
+//		aes_gpio_write(0x7074696F,IKEY_BASE_ADDRESS + 2);
+//		freeTime();
+//		aes_gpio_write(0x6E4B6579,IKEY_BASE_ADDRESS + 3);
+//		freeTime();
+//
+//		//4.write 1 to iStart
+//		aes_gpio_write(1,START_BASE_ADDRESS);
+//		freeTime();
+//
+//		//wait
+//		while(aes_gpio_read(DATA_BASE_ADDRESS)==0);
+//		freeTime();
+//
+//		int result[4];
+//		result[0]= aes_gpio_read(DATA_BASE_ADDRESS + 0);
+//		freeTime();
+//		result[1]= aes_gpio_read(DATA_BASE_ADDRESS + 1);
+//		freeTime();
+//		result[2]= aes_gpio_read(DATA_BASE_ADDRESS + 2);
+//		freeTime();
+//		result[3]= aes_gpio_read(DATA_BASE_ADDRESS + 3);
+//		freeTime();
 
 //	int result_sub;
 //	result_sub=sub_8_bits_func(b,a);
